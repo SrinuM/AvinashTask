@@ -28,7 +28,7 @@ namespace SalesTaxAPI.Controllers
         public TaxResponse<TaxRateModel> GetTaxRatesForLocation([FromQuery]LocationTaxRequest request)
         {
             TaxResponse<TaxRateModel> response = new TaxResponse<TaxRateModel>();
-            if(string.IsNullOrWhiteSpace(request.LocationRequest.zip))
+            if(request.LocationRequest == null || string.IsNullOrWhiteSpace(request.LocationRequest.zip))
             {
                 response.IsSucess = false;
                 response.ErrorMessage = "zip is mandatory, Please check input.";

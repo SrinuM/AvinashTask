@@ -28,7 +28,8 @@ namespace SalesTaxAPI.DAL
         {
             TaxOrderModel response = new TaxOrderModel();
 
-            httpClient.ExecutePost(request);
+            var result = httpClient.ExecutePost(request);
+            response = JsonConvert.DeserializeObject<TaxOrderModel>(result);
 
             return response;
         }
