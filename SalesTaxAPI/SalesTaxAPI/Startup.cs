@@ -33,14 +33,7 @@ namespace SalesTaxAPI
         {
 
             services.AddControllers();
-            services.AddScoped<ISalesTaxService, SalesTaxService>();
-            //services.AddScoped<IHttpClientHelper, HttpClientHelper>();
-            // services.AddHttpClient<ISalesTaxService, SalesTaxService>(); // c =>
-            //{
-            //    c.BaseAddress = new Uri("https://api.taxjar.com/v2/taxes");
-            //    c.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", "5da2f821eee4035db4771edab942a4cc");
-
-            //});
+            services.AddScoped<ISalesTaxService, SalesTaxService>();            
 
             services.AddSwaggerGen(c =>
             {

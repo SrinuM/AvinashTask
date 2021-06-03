@@ -24,20 +24,21 @@ namespace SalesTaxAPI.DAL
             httpClient = client;            
         }     
 
-        public TaxResponse CalculateTaxesForOrder(TaxRequest request)
+        public TaxOrderModel CalculateTaxesForOrder(OrderRequest request)
         {
-            TaxResponse response = new TaxResponse();
+            TaxOrderModel response = new TaxOrderModel();
 
             httpClient.ExecutePost(request);
 
             return response;
         }
 
-        public TaxResponse GetTaxRatesForLocation(TaxRequest request)
+        public TaxRateModel GetTaxRatesForLocation(LocationReqest request)
         {
-            TaxResponse response = new TaxResponse();
+            TaxRateModel response = new TaxRateModel();
 
-             httpClient.ExecutePost(request);
+             var result = httpClient.ExecuteGet(request);
+            response = JsonConvert.DeserializeObject<TaxRateModel>(result);
            
             return response;
         }

@@ -11,13 +11,13 @@ using Xunit;
 
 namespace SalesTaxAAPITest
 {
-    public class HttpClientHelperTest
+    public class SalesTaxServiceTest
     {        
         SalesTaxService salesTaxService;
         Mock<IHttpClientHelper> clientHelper;
         IConfiguration configuration;
 
-        public HttpClientHelperTest()
+        public SalesTaxServiceTest()
         {        
             clientHelper = new Mock<IHttpClientHelper>();            
            
@@ -30,19 +30,22 @@ namespace SalesTaxAAPITest
         [Fact]
         public void Test1()
         {
-            TaxRequest taxRequest = new TaxRequest();
-            var customerReq = new CustomerRequest()
+            OrderRequest taxRequest = new OrderRequest();
+            var customerReq = new OrderTaxRequest()
             {
                 CustomerId = 1,
-                TaxRequest = taxRequest
+                OrderRequest = taxRequest
 
             };
-        
-            clientHelper.Setup(x => x.ExecutePost(taxRequest));
+
+            clientHelper.Setup(x => x.ExecutePost(taxRequest)).Returns("");
             salesTaxService = new SalesTaxService(configuration);
+         
             salesTaxService.clientHelper = clientHelper.Object;
 
-            salesTaxService.GetTaxRatesForLocation(customerReq);
+            var result = salesTaxService.CalculateTaxesForOrder(customerReq);
+
+            Assert.NotNull(result);
         }
     }
 }

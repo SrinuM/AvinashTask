@@ -8,7 +8,7 @@ namespace SalesTaxAPI.DAL.Contracts
 {
     public interface IHttpClientHelper
     {
-        void ExecutePost(TaxRequest request);
-        void ExecuteGet(TaxRequest request);
+        string ExecutePost(OrderRequest request);
+        string ExecuteGet(LocationReqest request);
     }
 }

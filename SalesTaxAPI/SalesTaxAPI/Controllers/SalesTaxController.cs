@@ -24,11 +24,49 @@ namespace SalesTaxAPI.Controllers
             configuration = configs;
         }
 
-        [HttpPost]
-        public IEnumerable<string> GetTaxInfoByLocation(CustomerRequest request)
-        {           
-            _taxService.GetTaxRatesForLocation(request);
-            return new string[] { "test123" };
+        [HttpGet,Route("GetTaxRatesForLocation")]
+        public TaxResponse<TaxRateModel> GetTaxRatesForLocation([FromQuery]LocationTaxRequest request)
+        {
+            TaxResponse<TaxRateModel> response = new TaxResponse<TaxRateModel>();
+            if(string.IsNullOrWhiteSpace(request.LocationRequest.zip))
+            {
+                response.IsSucess = false;
+                response.ErrorMessage = "zip is mandatory, Please check input.";
+                return response;
+            }
+
+            try
+            {
+                var result = _taxService.GetTaxRatesForLocation(request);
+                response.IsSucess = true;
+                response.Result = result;
+            }
+            catch(Exception ex)
+            {
+                response.IsSucess = false;
+                response.ErrorMessage = $"GetTaxInfo failed with error :{ex.Message}";
+            }
+
+            return response;
+        }
+
+        [HttpPost, Route("CalculateTaxForOrder")]
+        public TaxResponse<TaxOrderModel> CalulateTaxForOrder(OrderTaxRequest request)
+        {
+            TaxResponse<TaxOrderModel> response = new TaxResponse<TaxOrderModel>();
+            try
+            {
+                var result = _taxService.CalculateTaxesForOrder(request);
+                response.IsSucess = true;
+                response.Result = result;
+            }
+            catch (Exception ex)
+            {
+                response.IsSucess = false;
+                response.ErrorMessage = $"CalculateTaxesForOrder failed with error :{ex.Message}";
+            }
+
+            return response;
         }
     }
 }

@@ -24,42 +24,32 @@ namespace SalesTaxAPI.DAL.Services
             Customers = new List<Customer>();
             configs.GetSection("Customers").Bind(Customers);
         }
-        
-        public TaxResponse CalculateTaxesForOrder(CustomerRequest request)
+
+        public TaxOrderModel CalculateTaxesForOrder(OrderTaxRequest request)
         {
-            TaxResponse response = new TaxResponse();
-            this.CreateTaxCalculator(request.CustomerId);
-            try
-            {
-                response = taxCalculator.GetTaxRatesForLocation(request.TaxRequest);
-            }
-            catch (Exception ex)
-            {
-                //
-            }
-            return null;
+            TaxOrderModel response = new TaxOrderModel();
+            this.CreateTaxCalculator(request.CustomerId, "taxes");
+
+            response = taxCalculator.CalculateTaxesForOrder(request.OrderRequest);
+
+            return response;
         }
 
-        public TaxResponse GetTaxRatesForLocation(CustomerRequest request)
+        public TaxRateModel GetTaxRatesForLocation(LocationTaxRequest request)
         {
-            TaxResponse response = new TaxResponse();
-            this.CreateTaxCalculator(request.CustomerId);
-            try
-            {
-                response= taxCalculator.GetTaxRatesForLocation(request.TaxRequest);
-            }
-            catch(Exception ex)
-            {
-                //
-            }
+            TaxRateModel response = new TaxRateModel();
+            this.CreateTaxCalculator(request.CustomerId, "rates");
+
+            response = taxCalculator.GetTaxRatesForLocation(request.LocationRequest);
+
             return response;
         }
 
 
-        private void CreateTaxCalculator(int customerId)
+        private void CreateTaxCalculator(int customerId, string apiName)
         {
             var customer = Customers.FirstOrDefault(x => x.Id == customerId);
-
+            customer.apiUrl = customer.apiUrl + apiName;
             if (httpClient == null)
             {
                 httpClient = new HttpClientHelper(customer);

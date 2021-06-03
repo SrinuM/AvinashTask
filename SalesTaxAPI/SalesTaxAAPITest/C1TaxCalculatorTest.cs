@@ -30,11 +30,11 @@ namespace SalesTaxAAPITest
         [Fact]
         public void Test1()
         {
-            TaxRequest taxRequest = new TaxRequest();
-            var customerReq = new CustomerRequest()
+            OrderRequest taxRequest = new OrderRequest();
+            var customerReq = new OrderTaxRequest()
             {
                 CustomerId = 1,
-                TaxRequest = taxRequest
+                OrderRequest = taxRequest
 
             };
         
@@ -42,7 +42,7 @@ namespace SalesTaxAAPITest
             salesTaxService = new SalesTaxService(configuration);
             salesTaxService.clientHelper = clientHelper.Object;
 
-            salesTaxService.GetTaxRatesForLocation(customerReq);
+            salesTaxService.CalculateTaxesForOrder(customerReq);
         }
     }
 }
