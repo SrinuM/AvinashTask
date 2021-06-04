@@ -10,9 +10,9 @@ using System.Collections.Generic;
 using System.Net.Http;
 using Xunit;
 
-namespace SalesTaxAAPITest
+namespace SalesTaxAAPITest.Helpers
 {
-    public class HttpClientHelperTest
+    public class SalesTaxControllerTest
     {
         [Fact]
         public void NullCustomerTest()

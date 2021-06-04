@@ -23,20 +23,12 @@ namespace SalesTaxAPI.DAL
 
         public TaxOrderModel CalculateTaxesForOrder(OrderRequest request)
         {
-            TaxOrderModel response = new TaxOrderModel();
-
-            httpClient.ExecutePost(request);
-
-            return response;
+            throw new NotImplementedException();
         }
 
         public TaxRateModel GetTaxRatesForLocation(LocationReqest request)
         {
-            TaxRateModel response = new TaxRateModel();
-
-            httpClient.ExecuteGet(request);
-
-            return response;
+            throw new NotImplementedException();
         }
     }
 }

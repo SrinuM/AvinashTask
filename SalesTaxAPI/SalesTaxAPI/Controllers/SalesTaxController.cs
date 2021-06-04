@@ -28,20 +28,25 @@ namespace SalesTaxAPI.Controllers
         public TaxResponse<TaxRateModel> GetTaxRatesForLocation([FromQuery]LocationTaxRequest request)
         {
             TaxResponse<TaxRateModel> response = new TaxResponse<TaxRateModel>();
-            if(request.LocationRequest == null || string.IsNullOrWhiteSpace(request.LocationRequest.zip))
+            if (request.CustomerId <= 0)
+            {
+                response.IsSucess = false;
+                response.ErrorMessage = "Invalid customerId.";
+                return response;
+            }
+            else if (request.LocationRequest == null || string.IsNullOrWhiteSpace(request.LocationRequest.zip))
             {
                 response.IsSucess = false;
                 response.ErrorMessage = "zip is mandatory, Please check input.";
                 return response;
             }
+           
 
             try
             {
-                var result = _taxService.GetTaxRatesForLocation(request);
-                response.IsSucess = true;
-                response.Result = result;
+                response = _taxService.GetTaxRatesForLocation(request);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 response.IsSucess = false;
                 response.ErrorMessage = $"GetTaxInfo failed with error :{ex.Message}";
@@ -54,11 +59,16 @@ namespace SalesTaxAPI.Controllers
         public TaxResponse<TaxOrderModel> CalulateTaxForOrder(OrderTaxRequest request)
         {
             TaxResponse<TaxOrderModel> response = new TaxResponse<TaxOrderModel>();
+            if (request.CustomerId <= 0)
+            {
+                response.IsSucess = false;
+                response.ErrorMessage = "Invalid customerId.";
+                return response;
+            }
+
             try
             {
-                var result = _taxService.CalculateTaxesForOrder(request);
-                response.IsSucess = true;
-                response.Result = result;
+                response = _taxService.CalculateTaxesForOrder(request);                
             }
             catch (Exception ex)
             {

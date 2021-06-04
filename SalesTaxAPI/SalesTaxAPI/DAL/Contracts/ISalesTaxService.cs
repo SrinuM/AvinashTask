@@ -8,7 +8,7 @@ namespace SalesTaxAPI.DAL.Contracts
 {
     public interface ISalesTaxService
     {
-        TaxRateModel GetTaxRatesForLocation(LocationTaxRequest request);
-        TaxOrderModel CalculateTaxesForOrder(OrderTaxRequest request);
+        TaxResponse<TaxRateModel> GetTaxRatesForLocation(LocationTaxRequest request);
+        TaxResponse<TaxOrderModel> CalculateTaxesForOrder(OrderTaxRequest request);
     }
 }

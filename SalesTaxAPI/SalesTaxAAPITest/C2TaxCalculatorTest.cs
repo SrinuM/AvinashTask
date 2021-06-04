@@ -1,6 +1,7 @@
 using Microsoft.Extensions.Configuration;
 using Moq;
 using Newtonsoft.Json;
+using SalesTaxAPI.DAL;
 using SalesTaxAPI.DAL.Contracts;
 using SalesTaxAPI.DAL.Services;
 using SalesTaxAPI.Models;
@@ -12,10 +13,10 @@ using Xunit;
 namespace SalesTaxAAPITest
 {
     public class C2TaxCalculatorTest
-    {        
-        SalesTaxService salesTaxService;
+    {               
         Mock<IHttpClientHelper> clientHelper;
         IConfiguration configuration;
+        ITaxCalculator taxCalculator;
 
         public C2TaxCalculatorTest()
         {        
@@ -28,21 +29,47 @@ namespace SalesTaxAAPITest
         }
 
         [Fact]
-        public void Test1()
+        public void InvalidClientTest()
         {
+            // Action
+            var ex = Assert.Throws<ArgumentNullException>(() => new C2TaxCalculator(null));
+
+            // Assertion
+            Assert.Equal("httpclient is null. (Parameter 'client')", ex.Message);
+        }
+
+        [Fact]
+        public void CalculateTaxesForOrderTest()
+        {
+            // Setup
             OrderRequest taxRequest = new OrderRequest();
-            var customerReq = new OrderTaxRequest()
-            {
-                CustomerId = 1,
-                OrderRequest = taxRequest
+            TaxOrderModel taxOrderModel = new TaxOrderModel();                       
+            taxCalculator = new C2TaxCalculator(clientHelper.Object);
 
-            };
-        
-            clientHelper.Setup(x => x.ExecutePost(taxRequest));
-            salesTaxService = new SalesTaxService(configuration);
-            salesTaxService.clientHelper = clientHelper.Object;
+            // Action
+            var result = Assert.Throws<NotImplementedException>(()=> taxCalculator.CalculateTaxesForOrder(taxRequest));
 
-            salesTaxService.CalculateTaxesForOrder(customerReq);
+            // Assertion
+            Assert.NotNull(result);
+            Assert.Equal("The method or operation is not implemented.", result.Message);
+           
+        }
+
+        [Fact]
+        public void GetTaxRatesForLocationTest()
+        {
+            // Setup
+            LocationReqest request = new LocationReqest();
+            TaxRateModel rateModel = new TaxRateModel();
+           
+            taxCalculator = new C2TaxCalculator(clientHelper.Object);
+
+            // Action
+            var result = Assert.Throws<NotImplementedException>(()=>taxCalculator.GetTaxRatesForLocation(request));
+
+            // Assertion
+            Assert.NotNull(result);           
+            Assert.Equal("The method or operation is not implemented.", result.Message);            
         }
     }
 }

@@ -18,6 +18,7 @@ namespace SalesTaxAPI.DAL.Services
         private ITaxCalculator taxCalculator;
         private IConfiguration _configs;
         private List<Customer> Customers;
+        private string errorMsg = string.Empty;
         public SalesTaxService(IConfiguration configs)
         {            
             _configs = configs;
@@ -25,51 +26,80 @@ namespace SalesTaxAPI.DAL.Services
             configs.GetSection("Customers").Bind(Customers);
         }
 
-        public TaxOrderModel CalculateTaxesForOrder(OrderTaxRequest request)
+        public TaxResponse<TaxOrderModel> CalculateTaxesForOrder(OrderTaxRequest request)
         {
-            TaxOrderModel response = new TaxOrderModel();
+            TaxResponse<TaxOrderModel> response = new TaxResponse<TaxOrderModel>();
             this.CreateTaxCalculator(request.CustomerId, "taxes");
 
-            response = taxCalculator.CalculateTaxesForOrder(request.OrderRequest);
+            if (!string.IsNullOrEmpty(this.errorMsg))
+            {
+                response.ErrorMessage = errorMsg;
+                response.IsSucess = false;
+
+                return response;
+            }
+
+            response.Result = taxCalculator.CalculateTaxesForOrder(request.OrderRequest);
+            response.ErrorMessage = errorMsg;
+            response.IsSucess = string.IsNullOrEmpty(errorMsg) ? true : false;
 
             return response;
         }
 
-        public TaxRateModel GetTaxRatesForLocation(LocationTaxRequest request)
+        public TaxResponse<TaxRateModel> GetTaxRatesForLocation(LocationTaxRequest request)
         {
-            TaxRateModel response = new TaxRateModel();
+            TaxResponse<TaxRateModel> response = new TaxResponse<TaxRateModel>();
             this.CreateTaxCalculator(request.CustomerId, "rates");
 
-            response = taxCalculator.GetTaxRatesForLocation(request.LocationRequest);
+            if(!string.IsNullOrEmpty(this.errorMsg))
+            {
+                response.ErrorMessage = errorMsg;
+                response.IsSucess = false;
+
+                return response;
+            }
+
+            response.Result = taxCalculator.GetTaxRatesForLocation(request.LocationRequest);
+            
+            response.ErrorMessage = errorMsg;
+            response.IsSucess = string.IsNullOrEmpty(errorMsg) ? true : false;
 
             return response;
         }
-
 
         private void CreateTaxCalculator(int customerId, string apiName)
         {
             var customer = Customers.FirstOrDefault(x => x.Id == customerId);
-            customer.apiUrl = customer.apiUrl + apiName;
-            if (httpClient == null)
+
+            if (customer != null)
             {
-                httpClient = new HttpClientHelper(customer);
+                customer.apiUrl = customer.apiUrl + apiName;
+                if (httpClient == null)
+                {
+                    httpClient = new HttpClientHelper(customer);
+                }
+
+                switch (customerId)
+                {
+                    case 1:
+
+                        taxCalculator = new C1TaxCalculator(httpClient);
+                        break;
+                    case 2:
+
+                        taxCalculator = new C2TaxCalculator(httpClient);
+                        break;
+                    default:
+                        errorMsg = "Invalid Customer";
+                        return;
+                }
             }
-            
-            switch(customerId)
+            else
             {
-                case 1:
-
-                    taxCalculator = new C1TaxCalculator(httpClient);
-                    break;
-                case 2:
-
-                    taxCalculator = new C2TaxCalculator(httpClient);
-                    break;
-                default:
-                    throw new Exception("Invalid Customer");
-            }           
+                // Logging error
+                errorMsg = "TaxAPI not available for the given customer";
+            }
         }
-
 
         public IHttpClientHelper clientHelper
         {
