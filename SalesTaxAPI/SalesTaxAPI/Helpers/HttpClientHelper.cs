@@ -13,9 +13,8 @@ using System.Threading.Tasks;
 namespace SalesTaxAPI.Helpers
 {
     public class HttpClientHelper: IHttpClientHelper
-    {
-        HttpClient httpClient;
-        string baseAddress;
+    {       
+        private Customer _customer;        
 
         public HttpClientHelper(Customer customer)
         {
@@ -27,31 +26,27 @@ namespace SalesTaxAPI.Helpers
             {
                 throw new ArgumentException("APIURL and APIKey must be valid. Please check.");
             }
-
-            httpClient = new HttpClient()
-            {
-                BaseAddress = new Uri(customer.apiUrl)
-            };
-            baseAddress = customer.apiUrl;
-            httpClient.DefaultRequestHeaders.Accept.Clear();
-            httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", customer.apiKey);
+            _customer = customer;            
         }
 
         public string ExecuteGet(LocationReqest request)
         {            
             try
             {
-                string queryUrl = GetQueryUrl(request);
-                 
-                httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+                string apiUrl = $"{_customer.apiUrl}v2/rates";
+                string queryUrl = GetQueryUrl(request, apiUrl);
 
-                var res = httpClient.GetAsync(queryUrl);
+                using (var httpClient = GetClient(apiUrl))
+                {
+                    httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
-                res.Result.EnsureSuccessStatusCode();
+                    var res = httpClient.GetAsync(queryUrl);
+                    res.Result.EnsureSuccessStatusCode();
 
-                var jsonResult = res.Result.Content.ReadAsStringAsync();
+                    var jsonResult = res.Result.Content.ReadAsStringAsync();
 
-                return jsonResult.Result;
+                    return jsonResult.Result;
+                }
             }
             catch (Exception ex)
             {
@@ -66,14 +61,16 @@ namespace SalesTaxAPI.Helpers
             {
                 var content = new StringContent(JsonConvert.SerializeObject(request));
                 content.Headers.ContentType = MediaTypeHeaderValue.Parse("application/json");
+                string Url = $"{_customer.apiUrl}v2/taxes";
+                using (var httpClient = this.GetClient(Url))
+                {
+                    var res = httpClient.PostAsync(httpClient.BaseAddress, content);
+                    res.Result.EnsureSuccessStatusCode();
 
-                var res = httpClient.PostAsync(httpClient.BaseAddress, content);
+                    var jsonResult = res.Result.Content.ReadAsStringAsync();
 
-                res.Result.EnsureSuccessStatusCode();
-
-                var jsonResult = res.Result.Content.ReadAsStringAsync();
-
-                return jsonResult.Result;
+                    return jsonResult.Result;
+                }
             }
             catch(Exception ex)
             {
@@ -82,11 +79,23 @@ namespace SalesTaxAPI.Helpers
             }
         }
 
+        private HttpClient GetClient(string Url)
+        {
+            HttpClient httpClient = new HttpClient()
+            {
+                BaseAddress = new Uri(Url)
+            };
 
-        private string GetQueryUrl(LocationReqest req)
+            httpClient.DefaultRequestHeaders.Accept.Clear();
+            httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _customer.apiKey);
+
+            return httpClient;
+        }
+
+        private string GetQueryUrl(LocationReqest req, string apiUrl)
         {
             var parameters = new Dictionary<string, string>();
-            string url = $"{baseAddress}?zip={req.zip}";
+            string url = $"{apiUrl}?zip={req.zip}";
 
             if (!string.IsNullOrEmpty(req.country))
                 url = url + $"&country={req.country}";

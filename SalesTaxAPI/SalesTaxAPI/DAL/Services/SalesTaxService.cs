@@ -29,7 +29,7 @@ namespace SalesTaxAPI.DAL.Services
         public TaxResponse<TaxOrderModel> CalculateTaxesForOrder(OrderTaxRequest request)
         {
             TaxResponse<TaxOrderModel> response = new TaxResponse<TaxOrderModel>();
-            this.CreateTaxCalculator(request.CustomerId, "taxes");
+            this.CreateTaxCalculator(request.CustomerId);
 
             if (!string.IsNullOrEmpty(this.errorMsg))
             {
@@ -49,7 +49,7 @@ namespace SalesTaxAPI.DAL.Services
         public TaxResponse<TaxRateModel> GetTaxRatesForLocation(LocationTaxRequest request)
         {
             TaxResponse<TaxRateModel> response = new TaxResponse<TaxRateModel>();
-            this.CreateTaxCalculator(request.CustomerId, "rates");
+            this.CreateTaxCalculator(request.CustomerId);
 
             if(!string.IsNullOrEmpty(this.errorMsg))
             {
@@ -67,13 +67,12 @@ namespace SalesTaxAPI.DAL.Services
             return response;
         }
 
-        private void CreateTaxCalculator(int customerId, string apiName)
+        private void CreateTaxCalculator(int customerId)
         {
             var customer = Customers.FirstOrDefault(x => x.Id == customerId);
 
             if (customer != null)
-            {
-                customer.apiUrl = customer.apiUrl + apiName;
+            {               
                 if (httpClient == null)
                 {
                     httpClient = new HttpClientHelper(customer);
